@@ -29,11 +29,17 @@ public class SimpleJDBCRepository {
 
     public Long createUser(User user) {
         try(Connection con = CustomDataSource.getInstance().getConnection();
-            PreparedStatement prepareStatement = con.prepareStatement(CREATE_USER_SQL)) {
-                prepareStatement.setString(1, user.getFirstName());
-                prepareStatement.setString(2, user.getLastName());
-                prepareStatement.setInt(3, user.getAge());
-                return (long) prepareStatement.executeUpdate();
+            PreparedStatement prepareStatement = con.prepareStatement(CREATE_USER_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            long id = 0;
+            prepareStatement.setString(1, user.getFirstName());
+            prepareStatement.setString(2, user.getLastName());
+            prepareStatement.setInt(3, user.getAge());
+            prepareStatement.execute();
+            ResultSet generatedKeys = prepareStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+              id = generatedKeys.getLong(1);
+            }
+            return id;
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -113,7 +119,7 @@ public class SimpleJDBCRepository {
         return User.builder()
                 .id(resultSet.getLong("id"))
                 .firstName(resultSet.getString("firstname"))
-                .lastName("lastname")
+                .lastName(resultSet.getString("lastname"))
                 .age(resultSet.getInt("age"))
                 .build();
     }
