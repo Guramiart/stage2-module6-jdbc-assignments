@@ -35,7 +35,7 @@ public class CustomDataSource implements DataSource {
             synchronized (CustomDataSource.class) {
                 try {
                     Properties properties = new Properties();
-                    properties.load(CustomDataSource.class.getResourceAsStream("app.properties"));
+                    properties.load(CustomDataSource.class.getClassLoader().getResourceAsStream("app.properties"));
                     instance = new CustomDataSource(
                             properties.getProperty("postgres.driver"),
                             properties.getProperty("postgres.url"),
@@ -71,7 +71,7 @@ public class CustomDataSource implements DataSource {
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
